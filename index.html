@@ -1,0 +1,1090 @@
+<html>
+
+<head>
+  <title>实时聊天室</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💬</text></svg>">
+</head>
+
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+
+	  body {
+	    background: #f5f5f5;
+	    width: 100vw;
+	    height: 100vh;
+	    min-height: 100dvh;
+	    display: flex;
+	    justify-content: stretch;
+	    align-items: stretch;
+	    padding: 0;
+	  }
+
+	  .chat-container {
+	    width: 100vw;
+	    height: 100vh;
+	    min-height: 100dvh;
+	    background: #fff;
+	    border-radius: 0;
+	    box-shadow: none;
+	    display: flex;
+	    flex-direction: column;
+	    overflow: hidden;
+	  }
+
+  .chat-header {
+    background: #fafafa;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .header-buttons {
+    display: flex;
+    gap: 10px;
+  }
+
+  .header-button {
+    background: #e0e0e0;
+    border: none;
+    border-radius: 3px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+
+  .header-button:hover {
+    background: #d0d0d0;
+  }
+
+  #chat-content {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    background: #f5f5f5;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .message {
+    max-width: 70%;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    position: relative;
+    word-wrap: break-word;
+    animation: fadeIn 0.2s;
+    font-size: 14px;
+    line-height: 1.5;
+    display: flex;
+    flex-direction: column;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(5px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .message-user {
+    align-self: flex-end;
+    background: #95ec69;
+    border-radius: 15px 5px 15px 15px;
+    color: #000;
+  }
+
+  .message-other {
+    align-self: flex-start;
+    background: #fff;
+    border-radius: 5px 15px 15px 15px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    color: #333;
+  }
+
+  .message-system {
+    align-self: center;
+    background: #e0e0e0;
+    border-radius: 5px;
+    color: #666;
+    font-size: 12px;
+    padding: 5px 10px;
+    margin: 10px 0;
+  }
+
+  .message-file,
+  .message-image {
+    align-self: flex-start;
+    background: #fff;
+    border-radius: 5px 15px 15px 15px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    color: #333;
+    max-width: 80%;
+  }
+
+  .file-info,
+  .image-info {
+    display: flex;
+    align-items: center;
+    margin-top: 5px;
+  }
+
+  .file-icon {
+    font-size: 24px;
+    margin-right: 10px;
+  }
+
+  .file-details,
+  .image-details {
+    flex: 1;
+  }
+
+  .file-name,
+  .image-name {
+    font-weight: bold;
+    margin-bottom: 3px;
+  }
+
+  .file-meta,
+  .image-meta {
+    font-size: 12px;
+    color: #999;
+  }
+
+  .file-download-link {
+    color: #1aad19;
+    text-decoration: none;
+    font-size: 12px;
+    display: inline-block;
+    margin-top: 5px;
+  }
+
+  .file-download-link:hover {
+    text-decoration: underline;
+  }
+
+  .message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+    font-size: 12px;
+    min-width: 80px;
+  }
+
+  .message-user .message-header {
+    flex-direction: row-reverse;
+  }
+
+  .user-name {
+    font-weight: bold;
+    color: #666;
+  }
+
+  .message-time {
+    color: #999;
+    font-size: 12px;
+  }
+
+  .message-content {
+    /* 内容区域 */
+  }
+
+  .search-container {
+    padding: 10px;
+    background: #fff;
+    border-top: 1px solid #e0e0e0;
+    display: none;
+  }
+
+  #search-input {
+    width: 100%;
+    padding: 8px 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 3px;
+    outline: none;
+    font-size: 14px;
+  }
+
+  #search-input:focus {
+    border-color: #1aad19;
+    box-shadow: 0 0 0 1px #1aad19;
+  }
+
+  .input-container {
+    display: flex;
+    padding: 10px;
+    background: #fff;
+    border-top: 1px solid #e0e0e0;
+  }
+
+  #text-input {
+    flex: 1;
+    padding: 8px 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 3px;
+    outline: none;
+    font-size: 14px;
+    resize: none;
+    height: 50px;
+  }
+
+  #text-input:focus {
+    border-color: #1aad19;
+    box-shadow: 0 0 0 1px #1aad19;
+  }
+
+  .toolbar {
+    display: flex;
+    padding: 5px;
+    background: #fff;
+    border-top: 1px solid #e0e0e0;
+  }
+
+  .toolbar-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2em;
+    color: #666;
+    padding: 5px;
+    border-radius: 3px;
+    transition: background-color 0.2s;
+  }
+
+  .toolbar-button:hover {
+    background: #f0f0f0;
+  }
+
+  #send-button {
+    background: #1aad19;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 0 20px;
+    margin-left: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+  }
+
+  #send-button:hover {
+    background: #179c16;
+  }
+
+  /* 滚动条样式优化 */
+  #chat-content::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  #chat-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+
+  #chat-content::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+  }
+
+  #chat-content::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+  }
+</style>
+
+<body>
+  <div class="chat-container">
+    <div class="chat-header">
+      <div class="header-title">实时聊天室</div>
+      <div class="header-buttons">
+        <button class="header-button" id="search-button">搜索</button>
+        <button class="header-button" id="clear-button">清空记录</button>
+      </div>
+    </div>
+    <div id="chat-content"></div>
+    <div class="search-container" id="search-container">
+      <input type="text" id="search-input" placeholder="搜索聊天记录...">
+    </div>
+    <div class="toolbar">
+      <button class="toolbar-button" id="file-button" title="发送文件">📎</button>
+      <button class="toolbar-button" id="image-button" title="发送图片">📷</button>
+      <input type="file" id="file-input" style="display: none;" multiple>
+      <input type="file" id="image-input" accept="image/*" style="display: none;" multiple>
+    </div>
+    <div class="input-container">
+      <textarea placeholder="请输入消息..." id="text-input"></textarea>
+      <button id="send-button">发送</button>
+    </div>
+  </div>
+
+  <script>
+	      const getWsUrl = () => {
+	        const scheme = window.location.protocol === "https:" ? "wss://" : "ws://";
+	        const u = new URL(scheme + window.location.host + "/ws");
+	        if (userId) u.searchParams.set("userId", userId);
+	        if (name) u.searchParams.set("userName", name);
+	        return u.toString();
+	      };
+    let ws = null;
+    let reconnectInterval = 1000; // 初始重连间隔
+    const maxReconnectInterval = 30000; // 最大重连间隔
+    const reconnectDecay = 1.5; // 重连间隔增长倍数
+
+    let userId = null;
+    let name = null; // 仅用于展示昵称，区分用户以 userId 为准
+
+    const sha256Hex = async (text) => {
+      const bytes = new TextEncoder().encode(text);
+      const hash = await crypto.subtle.digest("SHA-256", bytes);
+      return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, "0")).join("");
+    };
+
+    const getOrCreateUserId = async () => {
+      const cached = localStorage.getItem("webchatUserId");
+      if (cached) return cached;
+
+      let salt = localStorage.getItem("webchatUserSalt");
+      if (!salt) {
+        salt = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random());
+        localStorage.setItem("webchatUserSalt", salt);
+      }
+
+      const fp = [
+        salt,
+        navigator.userAgent || "",
+        navigator.language || "",
+        navigator.platform || "",
+        String(Intl.DateTimeFormat().resolvedOptions().timeZone || ""),
+        String(screen.width) + "x" + String(screen.height),
+        String(screen.colorDepth || ""),
+        String(navigator.hardwareConcurrency || ""),
+        String(navigator.deviceMemory || ""),
+        String(navigator.maxTouchPoints || "")
+      ].join("|");
+
+      const id = (await sha256Hex(fp)).slice(0, 16);
+      localStorage.setItem("webchatUserId", id);
+      return id;
+    };
+
+    // 初始化WebSocket连接
+    function connect() {
+      ws = new WebSocket(getWsUrl());
+
+      ws.onmessage = (msg) => {
+        try {
+          const data = JSON.parse(msg.data);
+          if (data.type === "file") {
+            // 判断是否为图片文件
+            const ext = data.filename.split('.').pop().toLowerCase();
+            const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+            const senderName = data.userName || data.user || "Unknown";
+            const isSelf = data.userId && userId && data.userId === userId;
+            if (imageExts.includes(ext)) {
+              addImageMessage(data.filename, data.filesize, senderName, data.userId || "", isSelf);
+            } else {
+              addFileMessage(data.filename, data.filesize, senderName, data.userId || "", isSelf);
+            }
+          } else if (data.type === "user") {
+            const senderName = data.userName || data.user || "Unknown";
+            const isSelf = data.userId && userId && data.userId === userId;
+            addTextMessage(data.content, senderName, data.userId || "", isSelf);
+          } else {
+            addSystemMessage(data.content);
+          }
+        } catch (error) {
+          console.error("处理消息时出错:", error);
+          addSystemMessage("收到无法解析的消息");
+        }
+      };
+
+	        ws.onopen = () => {
+	          reconnectInterval = 1000; // 重置重连间隔
+	          // 请求通知权限
+	          requestNotificationPermission();
+	        };
+
+      ws.onclose = (event) => {
+        // 非主动关闭，需要重连
+        addSystemMessage("连接已断开，尝试重新连接...");
+        setTimeout(() => {
+          connect();
+          // 逐渐增加重连间隔，但不超过最大值
+          reconnectInterval = Math.min(reconnectInterval * reconnectDecay, maxReconnectInterval);
+        }, reconnectInterval);
+      };
+
+      ws.onerror = (err) => {
+        addSystemMessage("连接错误：" + (err.message || "未知错误"));
+        console.error("WebSocket错误:", err);
+      };
+    }
+
+    const init = async () => {
+      userId = await getOrCreateUserId();
+      name = localStorage.getItem("webchatUserName");
+      if (!name) {
+        name = prompt("请输入你的昵称：");
+        if (!name) name = "用户" + Math.floor(Math.random() * 1000);
+        localStorage.setItem("webchatUserName", name);
+      }
+
+      connect();
+      loadChatHistory();
+      isFocused = document.hasFocus();
+    };
+
+    // DOM元素
+    const chat = document.getElementById("chat-content");
+    const text = document.getElementById("text-input");
+    const sendButton = document.getElementById("send-button");
+    const fileButton = document.getElementById("file-button");
+    const imageButton = document.getElementById("image-button");
+    const fileInput = document.getElementById("file-input");
+    const imageInput = document.getElementById("image-input");
+    const searchButton = document.getElementById("search-button");
+    const clearButton = document.getElementById("clear-button");
+    const searchContainer = document.getElementById("search-container");
+    const searchInput = document.getElementById("search-input");
+
+    // 页面标题相关
+    const originalTitle = "实时聊天室";
+    let unreadCount = 0;
+    let isFocused = true;
+
+    // 获取本地时间（修正时区问题）
+    const getNowTime = () => {
+      const date = new Date();
+      return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+    };
+
+    const formatFileSize = (b, d = 2) => {
+      if (b === 0) return '0 Bytes';
+      const k = 1024;
+      const s = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+      const i = Math.floor(Math.log(b) / Math.log(k));
+      return parseFloat((b / Math.pow(k, i)).toFixed(d)) + ' ' + s[i];
+    };
+
+    // 聊天记录相关功能
+    let chatHistory = [];
+
+    // 保存聊天记录到localStorage
+    const saveChatHistory = () => {
+      try {
+        localStorage.setItem('webchatHistory', JSON.stringify(chatHistory));
+      } catch (e) {
+        console.error("保存聊天记录失败:", e);
+      }
+    };
+
+    // 从localStorage加载聊天记录
+    const loadChatHistory = () => {
+      try {
+        const savedHistory = localStorage.getItem('webchatHistory');
+        if (savedHistory) {
+          chatHistory = JSON.parse(savedHistory);
+          // 清空当前聊天内容
+          chat.innerHTML = '';
+          // 重新渲染聊天记录
+          chatHistory.forEach(msg => {
+            const senderName = msg.senderName || msg.sender || "Unknown";
+            const senderId = msg.senderId || "";
+            switch (msg.type) {
+              case 'text':
+                addTextMessage(msg.content, senderName, senderId, !!msg.isSelf, msg.time, false);
+                break;
+              case 'file':
+                addFileMessage(msg.filename, msg.filesize, senderName, senderId, !!msg.isSelf, msg.time, false);
+                break;
+              case 'image':
+                addImageMessage(msg.filename, msg.filesize, senderName, senderId, !!msg.isSelf, msg.time, false);
+                break;
+              case 'system':
+                addSystemMessage(msg.content, msg.time, false);
+                break;
+            }
+          });
+        }
+      } catch (e) {
+        console.error("加载聊天记录失败:", e);
+      }
+    };
+
+    // 清空聊天记录
+    const clearChatHistory = () => {
+      if (confirm("确定要清空所有聊天记录吗？此操作不可恢复。")) {
+        chatHistory = [];
+        chat.innerHTML = '';
+        saveChatHistory();
+      }
+    };
+
+    // 搜索聊天记录
+    const searchChatHistory = (keyword) => {
+      if (!keyword) {
+        // 如果搜索关键词为空，显示所有消息
+        loadChatHistory();
+        return;
+      }
+
+      // 清空当前显示
+      chat.innerHTML = '';
+
+      // 过滤并显示匹配的消息
+      chatHistory.forEach(msg => {
+        const senderName = msg.senderName || msg.sender || "Unknown";
+        const senderId = msg.senderId || "";
+        let content = '';
+        switch (msg.type) {
+          case 'text':
+            content = msg.content;
+            break;
+          case 'file':
+            content = msg.filename;
+            break;
+          case 'image':
+            content = msg.filename;
+            break;
+          case 'system':
+            content = msg.content;
+            break;
+        }
+
+        // 如果消息内容包含关键词，则显示
+        if (content && content.toLowerCase().includes(keyword.toLowerCase())) {
+          switch (msg.type) {
+            case 'text':
+              addTextMessage(msg.content, senderName, senderId, !!msg.isSelf, msg.time, false);
+              break;
+            case 'file':
+              addFileMessage(msg.filename, msg.filesize, senderName, senderId, !!msg.isSelf, msg.time, false);
+              break;
+            case 'image':
+              addImageMessage(msg.filename, msg.filesize, senderName, senderId, !!msg.isSelf, msg.time, false);
+              break;
+            case 'system':
+              addSystemMessage(msg.content, msg.time, false);
+              break;
+          }
+        }
+      });
+    };
+
+    // 创建消息头部元素
+    const createMessageHeader = (sender, time, isSelf) => {
+      const headerDiv = document.createElement("div");
+      headerDiv.className = "message-header";
+
+      const nameDiv = document.createElement("div");
+      nameDiv.className = "user-name";
+      nameDiv.textContent = sender;
+
+      const timeDiv = document.createElement("div");
+      timeDiv.className = "message-time";
+      timeDiv.textContent = time;
+
+      if (isSelf) {
+        headerDiv.appendChild(timeDiv);
+        headerDiv.appendChild(nameDiv);
+      } else {
+        headerDiv.appendChild(nameDiv);
+        headerDiv.appendChild(timeDiv);
+      }
+
+      return headerDiv;
+    };
+
+    // 更新页面标题以显示未读消息数
+    const updateTitle = () => {
+      if (unreadCount > 0 && !isFocused) {
+        document.title = `(${unreadCount}) ${originalTitle}`;
+      } else {
+        document.title = originalTitle;
+      }
+    };
+
+    // 请求通知权限
+    const requestNotificationPermission = () => {
+      if ("Notification" in window) {
+        Notification.requestPermission().then(permission => {
+          console.log("通知权限状态:", permission);
+        });
+      }
+    };
+
+    // 显示浏览器通知
+    const showNotification = (title, body) => {
+      // 检查是否支持通知以及是否在不活跃状态下
+      if (!isFocused && "Notification" in window && Notification.permission === "granted") {
+        const notification = new Notification(title, {
+          body: body,
+          icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E💬%3C/text%3E%3C/svg%3E"
+        });
+
+        // 点击通知时聚焦到聊天窗口
+        notification.onclick = () => {
+          window.focus();
+          notification.close();
+        };
+      }
+    };
+
+    // 增加未读计数
+    const incrementUnreadCount = (messageInfo) => {
+      if (!isFocused) {
+        unreadCount++;
+        updateTitle();
+        showNotification("新消息", messageInfo);
+      }
+    };
+
+    // 页面聚焦事件处理
+    window.onfocus = () => {
+      isFocused = true;
+      unreadCount = 0;
+      updateTitle();
+    };
+
+    // 页面失去焦点事件处理
+    window.onblur = () => {
+      isFocused = false;
+    };
+
+    // 添加文本消息到聊天窗口和历史记录
+    const addTextMessage = (content, senderName, senderId, isSelf, time = getNowTime(), save = true) => {
+      const messageDiv = document.createElement("div");
+      messageDiv.className = isSelf ? "message message-user" : "message message-other";
+
+      // 消息头部（用户名和时间）
+      messageDiv.appendChild(createMessageHeader(senderName, time, isSelf));
+
+      // 消息内容
+      const contentDiv = document.createElement("pre");
+      contentDiv.className = "message-content";
+      contentDiv.style.whiteSpace = "pre-wrap";
+      contentDiv.style.wordBreak = "break-word";
+      contentDiv.textContent = content;
+      messageDiv.appendChild(contentDiv);
+
+      chat.appendChild(messageDiv);
+      chat.scrollTop = chat.scrollHeight;
+
+      // 如果不是自己发送的消息且页面不在焦点中，增加未读计数
+      if (!isSelf) {
+        incrementUnreadCount(`${senderName}: ${content}`);
+      }
+
+      // 保存到历史记录
+      if (save) {
+        chatHistory.push({
+          type: 'text',
+          content: content,
+          senderName: senderName,
+          senderId: senderId,
+          isSelf: isSelf,
+          time: time
+        });
+        saveChatHistory();
+      }
+    };
+
+    // 添加系统消息到聊天窗口和历史记录
+    const addSystemMessage = (content, time = getNowTime(), save = true) => {
+      const messageDiv = document.createElement("div");
+      messageDiv.className = "message message-system";
+      messageDiv.textContent = content;
+      chat.appendChild(messageDiv);
+      chat.scrollTop = chat.scrollHeight;
+
+      // 对于系统消息，除了连接成功和断开连接的消息，其他都通知
+      if (!content.includes("连接成功") && !content.includes("连接已断开") && !isFocused) {
+        incrementUnreadCount(`系统消息: ${content}`);
+      }
+
+      // 保存到历史记录
+      if (save) {
+        chatHistory.push({
+          type: 'system',
+          content: content,
+          time: time
+        });
+        saveChatHistory();
+      }
+
+      return messageDiv; // 返回元素引用，方便后续操作
+    };
+
+    // 添加图片和文件消息的通用函数
+    const addMediaMessage = (filename, filesize, senderName, senderId, isSelf, time = getNowTime(), save = true) => {
+      const isImage = (() => {
+        const ext = filename.split('.').pop().toLowerCase();
+        const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+        return imageExts.includes(ext);
+      })();
+
+      const fileUrl = "/files/" + encodeURIComponent(filename);
+
+      const messageDiv = document.createElement("div");
+      messageDiv.className = isSelf
+        ? "message message-user"
+        : (isImage ? "message message-image" : "message message-file");
+
+      // 消息头部（用户名和时间）
+      messageDiv.appendChild(createMessageHeader(senderName, time, isSelf));
+
+      if (isImage) {
+        // 图片信息
+        const imageInfoDiv = document.createElement("div");
+        imageInfoDiv.className = "image-info";
+
+        // 创建缩略图容器
+        const thumbnailDiv = document.createElement("div");
+        thumbnailDiv.className = "image-thumbnail";
+        thumbnailDiv.style.cssText = "position: relative; display: inline-block; cursor: pointer; margin-bottom: 10px;";
+
+        // 创建缩略图
+        const imgElement = document.createElement("img");
+        imgElement.src = fileUrl;
+        imgElement.alt = filename;
+        imgElement.style.cssText = "max-width: 200px; max-height: 200px; border-radius: 5px;";
+
+        // 添加点击事件以放大图片
+        thumbnailDiv.onclick = () => showFullImage(fileUrl, filename);
+
+        thumbnailDiv.appendChild(imgElement);
+        imageInfoDiv.appendChild(thumbnailDiv);
+        messageDiv.appendChild(imageInfoDiv);
+      } else {
+        // 文件信息
+        const fileInfoDiv = document.createElement("div");
+        fileInfoDiv.className = "file-info";
+
+        const iconDiv = document.createElement("div");
+        iconDiv.className = "file-icon";
+        iconDiv.textContent = "📎";
+        fileInfoDiv.appendChild(iconDiv);
+
+        const detailsDiv = document.createElement("div");
+        detailsDiv.className = "file-details";
+
+        const nameDivFile = document.createElement("div");
+        nameDivFile.className = "file-name";
+        nameDivFile.textContent = filename;
+        detailsDiv.appendChild(nameDivFile);
+
+        const metaDiv = document.createElement("div");
+        metaDiv.className = "file-meta";
+        metaDiv.textContent = formatFileSize(filesize);
+        detailsDiv.appendChild(metaDiv);
+
+        fileInfoDiv.appendChild(detailsDiv);
+        messageDiv.appendChild(fileInfoDiv);
+      }
+
+      const link = document.createElement("a");
+      link.href = fileUrl;
+      link.textContent = isImage ? "下载原图" : "点击下载";
+      link.className = "file-download-link";
+      link.target = "_blank";
+      messageDiv.appendChild(link);
+
+      chat.appendChild(messageDiv);
+      chat.scrollTop = chat.scrollHeight;
+
+      // 如果不是自己发送的消息且页面不在焦点中，增加未读计数
+      if (!isSelf) {
+        const messageInfo = isImage
+          ? `${senderName} 发送了图片: ${filename}`
+          : `${senderName} 发送了文件: ${filename}`;
+        incrementUnreadCount(messageInfo);
+      }
+
+      // 保存到历史记录
+      if (save) {
+        chatHistory.push({
+          type: isImage ? 'image' : 'file',
+          filename: filename,
+          filesize: filesize,
+          senderName: senderName,
+          senderId: senderId,
+          isSelf: isSelf,
+          time: time
+        });
+        saveChatHistory();
+      }
+    };
+
+    // 添加图片消息到聊天窗口和历史记录 (简化为调用通用函数)
+    const addImageMessage = (filename, filesize, senderName, senderId, isSelf, time = getNowTime(), save = true) => {
+      addMediaMessage(filename, filesize, senderName, senderId, isSelf, time, save);
+    };
+
+    // 添加文件消息到聊天窗口和历史记录 (简化为调用通用函数)
+    const addFileMessage = (filename, filesize, senderName, senderId, isSelf, time = getNowTime(), save = true) => {
+      addMediaMessage(filename, filesize, senderName, senderId, isSelf, time, save);
+    };
+
+    // 显示完整图片的模态框
+    const showFullImage = (src, alt) => {
+      // 创建模态框
+      const modal = document.createElement("div");
+      modal.style.cssText = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; display: flex; justify-content: center; align-items: center;";
+
+      // 创建关闭按钮
+      const closeBtn = document.createElement("span");
+      closeBtn.innerHTML = "&times;";
+      closeBtn.style.cssText = "position: absolute; top: 20px; right: 30px; color: white; font-size: 40px; font-weight: bold; cursor: pointer;";
+      closeBtn.onclick = () => document.body.removeChild(modal);
+
+      // 创建图片元素
+      const fullImg = document.createElement("img");
+      fullImg.src = src;
+      fullImg.alt = alt;
+      fullImg.style.cssText = "max-width: 90%; max-height: 90%; border-radius: 5px;";
+
+      modal.appendChild(closeBtn);
+      modal.appendChild(fullImg);
+      document.body.appendChild(modal);
+
+      // 点击模态框背景关闭
+      modal.onclick = (event) => {
+        if (event.target === modal) {
+          document.body.removeChild(modal);
+        }
+      };
+    };
+
+    // 处理剪贴板粘贴事件
+    const handlePaste = (e) => {
+      const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+      let filesProcessed = false;
+
+      for (const index in items) {
+        const item = items[index];
+        // 处理文件类型（包括图片和其他文件）
+        if (item.kind === 'file') {
+          const blob = item.getAsFile();
+          uploadBlob(blob);
+          filesProcessed = true;
+        }
+      }
+
+      // 如果处理了文件，则阻止默认行为
+      if (filesProcessed) {
+        e.preventDefault();
+      }
+    };
+
+    // 上传Blob对象
+    const uploadBlob = (blob) => {
+      if (blob) {
+        let filename = "clipboard_" + Date.now();
+        // 尝试获取文件扩展名
+        if (blob.type) {
+          const ext = blob.type.split('/')[1];
+          if (ext) {
+            filename += "." + ext;
+          }
+        }
+
+        // 如果blob有name属性，使用真实的文件名
+        if (blob.name) {
+          filename = blob.name;
+        }
+
+        const formData = new FormData();
+        formData.append("file", blob, filename);
+        formData.append("userId", userId || "");
+        formData.append("userName", name || "");
+
+        // 添加上传状态提示
+        const statusMessage = addSystemMessage(`正在上传文件: ${filename}...`, getNowTime(), false);
+
+        fetch("/upload", {
+          method: "POST",
+          body: formData
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data.success) {
+              statusMessage.textContent = `文件上传完成: ${data.filename}`;
+            } else {
+              // 更新状态消息为错误信息
+              statusMessage.textContent = `文件上传失败: ${data.error || "未知错误"}`;
+              addSystemMessage("文件上传失败: " + (data.error || "未知错误"));
+            }
+          })
+          .catch(error => {
+            // 更新状态消息为错误信息
+            statusMessage.textContent = `文件上传出错: ${error.message || "网络错误"}`;
+            addSystemMessage("文件上传出错: " + (error.message || "网络错误"));
+            console.error("文件上传出错:", error);
+          });
+      }
+    };
+
+    // 上传多个文件
+    const uploadFiles = (input) => {
+      const files = input.files;
+      if (files.length > 0) {
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("userId", userId || "");
+          formData.append("userName", name || "");
+
+          // 添加上传状态提示
+          const statusMessage = addSystemMessage(`正在上传文件: ${file.name}...`, getNowTime(), false);
+
+          fetch("/upload", {
+            method: "POST",
+            body: formData
+          })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              return response.json();
+            })
+            .then(data => {
+              if (data.success) {
+                statusMessage.textContent = `文件上传完成: ${data.filename}`;
+              } else {
+                // 更新状态消息为错误信息
+                statusMessage.textContent = `文件上传失败: ${data.error || "未知错误"}`;
+                addSystemMessage("文件上传失败: " + (data.error || "未知错误"));
+              }
+            })
+            .catch(error => {
+              // 更新状态消息为错误信息
+              statusMessage.textContent = `文件上传出错: ${error.message || "网络错误"}`;
+              addSystemMessage("文件上传出错: " + (error.message || "网络错误"));
+              console.error("文件上传出错:", error);
+            });
+        }
+
+        input.value = "";
+      }
+    };
+
+    const sendMessage = () => {
+      if (text.value.trim() !== "") {
+        try {
+          const messageData = {
+            type: "text",
+            userId: userId || "",
+            userName: name || "",
+            content: text.value
+          };
+
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify(messageData));
+            text.value = "";
+          } else {
+            addSystemMessage("消息发送失败：连接未建立");
+          }
+        } catch (e) {
+          addSystemMessage("消息发送失败: " + (e.message || "未知错误"));
+          console.error("消息发送失败:", e);
+        }
+      }
+    };
+
+    text.addEventListener("keydown", (e) => {
+      // Ctrl+Enter 或 Cmd+Enter 发送消息
+      if ((e.key === "Enter" && (e.ctrlKey || e.metaKey)) ||
+        (e.key === "Enter" && !e.shiftKey && !e.ctrlKey && !e.metaKey)) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    // 监听粘贴事件
+    text.addEventListener("paste", handlePaste);
+
+    sendButton.onclick = sendMessage;
+
+    fileButton.onclick = () => fileInput.click();
+
+    imageButton.onclick = () => imageInput.click();
+
+    fileInput.onchange = () => uploadFiles(fileInput);
+
+    imageInput.onchange = () => uploadFiles(imageInput);
+
+    // 添加心跳机制以维持连接
+    setInterval(() => {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        try {
+          ws.send(JSON.stringify({ type: "ping" }));
+        } catch (e) {
+          console.error("发送心跳包失败:", e);
+        }
+      }
+    }, 30000); // 每30秒发送一次心跳包
+
+    // 搜索按钮点击事件
+    searchButton.onclick = () => {
+      if (searchContainer.style.display === 'none') {
+        searchContainer.style.display = 'block';
+        searchInput.focus();
+      } else {
+        searchContainer.style.display = 'none';
+        // 恢复显示所有聊天记录
+        loadChatHistory();
+      }
+    };
+
+    // 清空记录按钮点击事件
+    clearButton.onclick = clearChatHistory;
+
+    // 搜索输入事件
+    searchInput.addEventListener('input', function () {
+      searchChatHistory(this.value);
+    });
+
+    // 页面加载时自动加载聊天记录
+    window.onload = () => {
+      init();
+    };
+
+    // 页面可见性变化处理
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        isFocused = false;
+      } else {
+        isFocused = true;
+        unreadCount = 0;
+        updateTitle();
+      }
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,32 @@
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.o
+
+# Go build artifacts
+*.test
+*.out
+*.prof
+*.cover
+*.pprof
+
+# Go workspace / modules
+go.work
+go.work.sum
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# App runtime data
+files/
+
