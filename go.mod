@@ -1,6 +1,6 @@
 module webchat
 
-go 1.24.9
+go 1.23
 
 require (
 	github.com/gin-gonic/gin v1.11.0
